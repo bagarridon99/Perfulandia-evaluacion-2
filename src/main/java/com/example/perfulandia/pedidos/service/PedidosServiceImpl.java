@@ -1,6 +1,5 @@
 package com.example.perfulandia.pedidos.service;
 
-import com.example.perfulandia.inventario.service.InventarioService;
 import com.example.perfulandia.model.DetallePedidoModel;
 import com.example.perfulandia.model.PedidosModel;
 import com.example.perfulandia.model.ProductoModel;
@@ -9,15 +8,18 @@ import com.example.perfulandia.model.enums.EstadoPedido;
 import com.example.perfulandia.pedidos.dto.CrearPedidoRequestDTO;
 import com.example.perfulandia.pedidos.dto.ItemPedidoDTO;
 import com.example.perfulandia.pedidos.repository.PedidosRepository;
-import com.example.perfulandia.producto.repository.ProductoRepository;
 import com.example.perfulandia.usuario.service.UsuarioService;
+import com.example.perfulandia.model.InventarioModel;
+// --- NUEVAS IMPORTACIONES PARA FEIGN CLIENTS ---
+import com.example.perfulandia.pedidos.client.ProductoFeignClient;
+import com.example.perfulandia.pedidos.client.InventarioFeignClient;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -26,18 +28,23 @@ public class PedidosServiceImpl implements PedidosService {
 
     private final PedidosRepository pedidosRepository;
     private final UsuarioService usuarioService;
-    private final ProductoRepository productoRepository;
-    private final InventarioService inventarioService;
+
+
+    private final ProductoFeignClient productoClient;     // NUEVO
+    private final InventarioFeignClient inventarioClient; // NUEVO
 
     @Autowired
     public PedidosServiceImpl(PedidosRepository pedidosRepository,
                               UsuarioService usuarioService,
-                              ProductoRepository productoRepository,
-                              InventarioService inventarioService) {
+                              // ProductoRepository productoRepository, // QUITAR
+                              // InventarioService inventarioService,   // QUITAR
+                              ProductoFeignClient productoClient,       // AÑADIR
+                              InventarioFeignClient inventarioClient) { // AÑADIR
         this.pedidosRepository = pedidosRepository;
         this.usuarioService = usuarioService;
-        this.productoRepository = productoRepository;
-        this.inventarioService = inventarioService;
+
+        this.productoClient = productoClient;         // AÑADIR
+        this.inventarioClient = inventarioClient;       // AÑADIR
     }
 
     @Override
@@ -52,7 +59,7 @@ public class PedidosServiceImpl implements PedidosService {
 
         PedidosModel nuevoPedido = new PedidosModel();
         nuevoPedido.setUsuario(usuario);
-        // fechaPedido y estado se inicializan en el constructor de PedidosModel
+        // fechaPedido y estado se inicializan en el constructor de PedidosModel por defecto
 
         BigDecimal totalGeneral = BigDecimal.ZERO;
 
@@ -61,17 +68,26 @@ public class PedidosServiceImpl implements PedidosService {
                 throw new IllegalArgumentException("La cantidad para el producto ID " + itemDTO.productoId() + " debe ser positiva.");
             }
 
-            ProductoModel producto = productoRepository.findById(itemDTO.productoId())
-                    .orElseThrow(() -> new RuntimeException("Producto no encontrado con ID: " + itemDTO.productoId()));
+            // 1. Obtener producto usando Feign Client
+            ProductoModel producto = productoClient.obtenerProductoPorId(itemDTO.productoId());
+            if (producto == null) { // Feign podría devolver null o lanzar una excepción configurada si el servicio no responde o da 404
+                throw new RuntimeException("Producto no encontrado con ID: " + itemDTO.productoId() + " a través del servicio de productos.");
+            }
 
-            int stockDisponible = inventarioService.obtenerStockDisponible(producto.getId());
+            // 2. Obtener inventario/stock usando Feign Client
+            InventarioModel inventario = inventarioClient.obtenerInventarioPorProductoId(producto.getId());
+            if (inventario == null || inventario.getCantidadDisponible() == null) {
+                throw new RuntimeException("Inventario no encontrado o cantidad no disponible para el producto ID: " + producto.getId());
+            }
+            int stockDisponible = inventario.getCantidadDisponible();
+
             if (stockDisponible < itemDTO.cantidad()) {
                 throw new RuntimeException("Stock insuficiente para el producto: " + producto.getNombre() +
                         ". Stock actual: " + stockDisponible + ", Solicitado: " + itemDTO.cantidad());
             }
 
             DetallePedidoModel detalle = new DetallePedidoModel();
-            detalle.setProducto(producto);
+            detalle.setProducto(producto); // Guardamos la referencia al producto (obtenido vía Feign)
             detalle.setCantidad(itemDTO.cantidad());
             detalle.setPrecioUnitarioAlMomentoDeCompra(BigDecimal.valueOf(producto.getPrecio()));
             BigDecimal subtotalItem = detalle.getPrecioUnitarioAlMomentoDeCompra().multiply(BigDecimal.valueOf(itemDTO.cantidad()));
@@ -80,7 +96,9 @@ public class PedidosServiceImpl implements PedidosService {
             nuevoPedido.agregarDetalle(detalle);
             totalGeneral = totalGeneral.add(subtotalItem);
 
-            inventarioService.disminuirStock(producto.getId(), itemDTO.cantidad());
+            // 3. Disminuir el stock del producto usando Feign Client
+            // Esta llamada debe ser robusta. El servicio de inventario debe manejar su propia transacción.
+            inventarioClient.disminuirStock(producto.getId(), itemDTO.cantidad());
         }
 
         nuevoPedido.setTotalPedido(totalGeneral);

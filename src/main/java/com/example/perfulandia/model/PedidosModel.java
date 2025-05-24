@@ -1,6 +1,8 @@
 package com.example.perfulandia.model;
 
 import com.example.perfulandia.model.enums.EstadoPedido;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties; // <-- IMPORTACIÓN AÑADIDA
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -9,6 +11,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "pedidos")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) // <-- ANOTACIÓN AÑADIDA
 public class PedidosModel {
 
     @Id
@@ -27,13 +30,14 @@ public class PedidosModel {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false)
-    private UsuarioModel usuario;
+    private UsuarioModel usuario; // Considera @JsonBackReference si UsuarioModel tiene @JsonManagedReference a pedidos
 
     @OneToMany(
             mappedBy = "pedido",
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
+    @JsonManagedReference // Para el ciclo Pedido <-> DetallePedido
     private List<DetallePedidoModel> detalles = new ArrayList<>();
 
     public PedidosModel() {
@@ -42,22 +46,17 @@ public class PedidosModel {
         this.totalPedido = BigDecimal.ZERO;
     }
 
-    // Getters y Setters
+    // --- Getters y Setters (sin cambios) ---
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-
     public LocalDateTime getFechaPedido() { return fechaPedido; }
     public void setFechaPedido(LocalDateTime fechaPedido) { this.fechaPedido = fechaPedido; }
-
     public EstadoPedido getEstado() { return estado; }
     public void setEstado(EstadoPedido estado) { this.estado = estado; }
-
     public BigDecimal getTotalPedido() { return totalPedido; }
     public void setTotalPedido(BigDecimal totalPedido) { this.totalPedido = totalPedido; }
-
     public UsuarioModel getUsuario() { return usuario; }
     public void setUsuario(UsuarioModel usuario) { this.usuario = usuario; }
-
     public List<DetallePedidoModel> getDetalles() { return detalles; }
     public void setDetalles(List<DetallePedidoModel> detalles) { this.detalles = detalles; }
 

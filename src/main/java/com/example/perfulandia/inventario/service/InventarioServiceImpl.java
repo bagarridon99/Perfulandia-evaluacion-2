@@ -9,16 +9,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-@Service // Le indica a Spring que esta clase es un bean de servicio
+@Service
 public class InventarioServiceImpl implements InventarioService {
 
     private final InventarioRepository inventarioRepository;
-    // private final ProductoRepository productoRepository; // Descomenta si lo necesitas para cargar ProductoModel
 
     @Autowired
-    public InventarioServiceImpl(InventarioRepository inventarioRepository) { //, ProductoRepository productoRepository) {
+    public InventarioServiceImpl(InventarioRepository inventarioRepository) {
         this.inventarioRepository = inventarioRepository;
-        // this.productoRepository = productoRepository;
     }
 
     @Override
@@ -44,31 +42,25 @@ public class InventarioServiceImpl implements InventarioService {
             throw new IllegalArgumentException("El stock inicial no puede ser negativo.");
         }
 
-
         InventarioModel inventario = obtenerOCrearActualizarInventario(producto, stockInicial);
-
         return inventarioRepository.save(inventario);
     }
 
-
     private InventarioModel obtenerOCrearActualizarInventario(ProductoModel producto, int stockInicial) {
-        // Intenta buscar si ya existe un inventario para este producto
-        // El ID del inventario es el mismo que el del producto gracias a @MapsId
         Optional<InventarioModel> inventarioExistenteOpt = inventarioRepository.findById(producto.getId());
 
         InventarioModel inventario;
         if (inventarioExistenteOpt.isPresent()) {
             inventario = inventarioExistenteOpt.get();
-            // Si ya existe, actualizamos su stock al stockInicial proporcionado.
             inventario.setCantidadDisponible(stockInicial);
         } else {
-            // Si no existe, crea uno nuevo
             inventario = new InventarioModel();
-            inventario.setId(producto.getId()); // Establece el ID del inventario igual al del producto
-            inventario.setProducto(producto);   // Establece la relación bidireccional
+            // NO establecemos el ID manualmente aquí: inventario.setId(producto.getId());
+            // Al establecer la relación con @MapsId, Hibernate se encarga del ID.
+            inventario.setProducto(producto);
             inventario.setCantidadDisponible(stockInicial);
         }
-        return inventario; // Devuelve el inventario (nuevo o actualizado) listo para ser guardado
+        return inventario;
     }
 
     @Override

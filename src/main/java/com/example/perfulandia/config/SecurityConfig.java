@@ -48,9 +48,15 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authz -> authz
                         // --- Endpoints Públicos ---
-                        .requestMatchers("/api/v1/autentificacion/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/productos/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/inventarios/producto/**").permitAll()
+                        .requestMatchers("/api/v1/autentificacion/**").permitAll() // Registro, Login
+                        .requestMatchers(HttpMethod.GET, "/api/v1/productos/**").permitAll() // Ver productos
+                        .requestMatchers(HttpMethod.GET, "/api/v1/inventarios/producto/**").permitAll() // Ver stock/inventario
+
+                        // --- NUEVAS REGLAS: Endpoints de Inventario para llamadas internas de Feign ---
+                        // Permitimos PUT a estas rutas específicas para la comunicación interna simulada desde PedidosService.
+                        // En un entorno real de microservicios, esto se manejaría con autenticación servicio-a-servicio.
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/inventarios/producto/{productoId}/disminuir").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/inventarios/producto/{productoId}/incrementar").permitAll()
 
                         // --- Endpoints de Pedidos (Requieren autenticación o roles específicos) ---
                         .requestMatchers(HttpMethod.POST, "/api/v1/pedidos").authenticated()
@@ -58,7 +64,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/pedidos/{pedidoId}").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/v1/pedidos/{pedidoId}/estado").hasRole("ADMIN")
 
-                        // --- NUEVA REGLA: Endpoints de Notificaciones (Requieren autenticación) ---
+                        // --- Endpoints de Notificaciones (Requieren autenticación) ---
                         .requestMatchers("/api/v1/notificaciones/**").authenticated()
 
                         // --- Endpoints de Actuator (Opcional, ejemplo) ---
@@ -67,8 +73,8 @@ public class SecurityConfig {
                         // --- Cualquier otra petición requiere autenticación ---
                         .anyRequest().authenticated()
                 )
-                .httpBasic(withDefaults())
-                .formLogin(withDefaults());
+                .httpBasic(withDefaults()) // Habilitar HTTP Basic Auth
+                .formLogin(withDefaults()); // Habilitar Form Login por defecto
         // .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         return http.build();
