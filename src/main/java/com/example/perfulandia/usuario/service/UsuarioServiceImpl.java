@@ -3,11 +3,10 @@ package com.example.perfulandia.usuario.service;
 import com.example.perfulandia.model.UsuarioModel;
 import com.example.perfulandia.usuario.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy; // <-- AÑADE ESTA IMPORTACIÓN
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-// En una aplicación real, aquí inyectarías un PasswordEncoder
-// import org.springframework.security.crypto.password.PasswordEncoder;
-
 
 import java.util.List;
 import java.util.Optional;
@@ -16,19 +15,22 @@ import java.util.Optional;
 public class UsuarioServiceImpl implements UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
-    // private final PasswordEncoder passwordEncoder; // Descomentar si implementas encriptación
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UsuarioServiceImpl(UsuarioRepository usuarioRepository) { // Añadir PasswordEncoder passwordEncoder si lo usas
+    public UsuarioServiceImpl(UsuarioRepository usuarioRepository,
+                              @Lazy PasswordEncoder passwordEncoder) { // <-- AÑADE @Lazy AQUÍ
         this.usuarioRepository = usuarioRepository;
-        // this.passwordEncoder = passwordEncoder;
+        this.passwordEncoder = passwordEncoder;
     }
+
+    // ... el resto de tus métodos (anadirUsuario, buscarPorEmail, etc.) permanecen igual ...
+    // Asegúrate de que anadirUsuario y editarUsuario usen this.passwordEncoder.encode(...)
 
     @Override
     @Transactional
     public UsuarioModel anadirUsuario(UsuarioModel usuario) {
-        // En una aplicación real, encriptarías la contraseña antes de guardarla:
-        // usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
+        usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
         return usuarioRepository.save(usuario);
     }
 
@@ -36,6 +38,12 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Transactional(readOnly = true)
     public Optional<UsuarioModel> buscarUsuarioPorId(Long id) {
         return usuarioRepository.findById(id);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<UsuarioModel> buscarPorEmail(String email) {
+        return usuarioRepository.findByEmail(email);
     }
 
     @Override
@@ -53,9 +61,8 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuarioExistente.setNombre(usuarioConNuevosDatos.getNombre());
         usuarioExistente.setEmail(usuarioConNuevosDatos.getEmail());
 
-        if (usuarioConNuevosDatos.getPassword() != null && !usuarioConNuevosDatos.getPassword().isEmpty()) {
-
-            usuarioExistente.setPassword(usuarioConNuevosDatos.getPassword()); // Sin encriptar para este ejemplo
+        if (usuarioConNuevosDatos.getPassword() != null && !usuarioConNuevosDatos.getPassword().trim().isEmpty()) {
+            usuarioExistente.setPassword(passwordEncoder.encode(usuarioConNuevosDatos.getPassword()));
         }
         return usuarioRepository.save(usuarioExistente);
     }
