@@ -1,31 +1,29 @@
 package com.example.perfulandia.config;
 
-import com.example.perfulandia.autentificacion.service.UserDetailsServiceImpl; // Asegúrate que la ruta sea correcta
+import com.example.perfulandia.autentificacion.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy; // Importa Lazy si la usas en el constructor
-import org.springframework.http.HttpMethod; // Para especificar métodos HTTP
+// import org.springframework.context.annotation.Lazy; // Solo si lo necesitas para resolver ciclos
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-// import org.springframework.security.config.http.SessionCreationPolicy; // Para APIs stateless, si lo usas más adelante
+// import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
-import static org.springframework.security.config.Customizer.withDefaults; // Para usar configuraciones por defecto
+import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
-@EnableWebSecurity // Habilita la configuración de seguridad web de Spring Security
+@EnableWebSecurity
 public class SecurityConfig {
 
     private final UserDetailsServiceImpl userDetailsService;
 
     @Autowired
-    // Si aplicaste @Lazy a UserDetailsServiceImpl aquí para resolver un ciclo, mantenlo.
-    // Si el @Lazy lo pusiste en UsuarioServiceImpl para el PasswordEncoder, entonces no es necesario aquí.
     public SecurityConfig(UserDetailsServiceImpl userDetailsService) {
         this.userDetailsService = userDetailsService;
     }
@@ -47,29 +45,30 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // Deshabilitar CSRF para APIs REST
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authz -> authz
                         // --- Endpoints Públicos ---
-                        .requestMatchers("/api/v1/autentificacion/**").permitAll() // Registro, Login (si es personalizado)
-                        .requestMatchers(HttpMethod.GET, "/api/v1/productos/**").permitAll() // Ver productos
-                        .requestMatchers(HttpMethod.GET, "/api/v1/inventarios/producto/**").permitAll() // Ver stock/inventario
+                        .requestMatchers("/api/v1/autentificacion/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/productos/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/inventarios/producto/**").permitAll()
 
-                        // --- Endpoints de Pedidos ---
-                        .requestMatchers(HttpMethod.POST, "/api/v1/pedidos").authenticated() // Crear un pedido requiere autenticación
-                        .requestMatchers(HttpMethod.GET, "/api/v1/pedidos/mis-pedidos").authenticated() // Ver mis pedidos requiere autenticación
-                        .requestMatchers(HttpMethod.GET, "/api/v1/pedidos/{pedidoId}").authenticated() // Ver un pedido específico requiere autenticación
-                        // Para actualizar estado, solo ADMIN (asegúrate de tener usuarios con ROLE_ADMIN)
+                        // --- Endpoints de Pedidos (Requieren autenticación o roles específicos) ---
+                        .requestMatchers(HttpMethod.POST, "/api/v1/pedidos").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/pedidos/mis-pedidos").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/pedidos/{pedidoId}").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/v1/pedidos/{pedidoId}/estado").hasRole("ADMIN")
 
-                        // --- Endpoints de Actuator (Opcional) ---
-                        // .requestMatchers("/actuator/**").permitAll() // O .hasRole("ADMIN") si quieres protegerlos
+                        // --- NUEVA REGLA: Endpoints de Notificaciones (Requieren autenticación) ---
+                        .requestMatchers("/api/v1/notificaciones/**").authenticated()
+
+                        // --- Endpoints de Actuator (Opcional, ejemplo) ---
+                        // .requestMatchers("/actuator/**").hasRole("ADMIN")
 
                         // --- Cualquier otra petición requiere autenticación ---
                         .anyRequest().authenticated()
                 )
-                .httpBasic(withDefaults()) // Habilitar HTTP Basic Auth
-                .formLogin(withDefaults()); // Habilitar Form Login por defecto
-        // Para APIs stateless con JWT, la gestión de sesión sería diferente:
+                .httpBasic(withDefaults())
+                .formLogin(withDefaults());
         // .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         return http.build();
