@@ -3,7 +3,7 @@ package com.example.perfulandia.usuario.service;
 import com.example.perfulandia.model.UsuarioModel;
 import com.example.perfulandia.usuario.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy; // <-- AÑADE ESTA IMPORTACIÓN
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,17 +19,22 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Autowired
     public UsuarioServiceImpl(UsuarioRepository usuarioRepository,
-                              @Lazy PasswordEncoder passwordEncoder) { // <-- AÑADE @Lazy AQUÍ
+                              @Lazy PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
-    // ... el resto de tus métodos (anadirUsuario, buscarPorEmail, etc.) permanecen igual ...
-    // Asegúrate de que anadirUsuario y editarUsuario usen this.passwordEncoder.encode(...)
-
     @Override
     @Transactional
     public UsuarioModel anadirUsuario(UsuarioModel usuario) {
+        // --- INICIO DE CAMBIO/VERIFICACIÓN ---
+        // Si el campo 'roles' en el objeto UsuarioModel que llega es nulo o vacío,
+        // asignamos "ROLE_USER" por defecto.
+        if (usuario.getRoles() == null || usuario.getRoles().trim().isEmpty()) {
+            usuario.setRoles("ROLE_USER"); // Asigna un rol por defecto
+        }
+        // --- FIN DE CAMBIO/VERIFICACIÓN ---
+
         usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
         return usuarioRepository.save(usuario);
     }
@@ -61,9 +66,14 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuarioExistente.setNombre(usuarioConNuevosDatos.getNombre());
         usuarioExistente.setEmail(usuarioConNuevosDatos.getEmail());
 
+        // Solo actualiza y encripta la contraseña si se proporciona una nueva y no está vacía
         if (usuarioConNuevosDatos.getPassword() != null && !usuarioConNuevosDatos.getPassword().trim().isEmpty()) {
             usuarioExistente.setPassword(passwordEncoder.encode(usuarioConNuevosDatos.getPassword()));
         }
+        // Si quisieras actualizar roles aquí también, necesitarías una lógica similar:
+        // if (usuarioConNuevosDatos.getRoles() != null && !usuarioConNuevosDatos.getRoles().trim().isEmpty()) {
+        //     usuarioExistente.setRoles(usuarioConNuevosDatos.getRoles());
+        // }
         return usuarioRepository.save(usuarioExistente);
     }
 
