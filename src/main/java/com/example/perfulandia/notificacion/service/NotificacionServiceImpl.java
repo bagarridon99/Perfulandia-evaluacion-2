@@ -14,11 +14,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Service // Marca esta clase como un servicio de Spring
+@Service
 public class NotificacionServiceImpl implements NotificacionService {
 
     private final NotificacionRepository notificacionRepository;
-    private final UsuarioService usuarioService; // Para buscar el usuario por email
+    private final UsuarioService usuarioService;
 
     @Autowired
     public NotificacionServiceImpl(NotificacionRepository notificacionRepository, UsuarioService usuarioService) {
@@ -27,7 +27,7 @@ public class NotificacionServiceImpl implements NotificacionService {
     }
 
     @Override
-    @Transactional // Esta operación modifica datos
+    @Transactional
     public NotificacionModel crearNotificacion(UsuarioModel destinatario, String mensaje) {
         if (destinatario == null) {
             throw new IllegalArgumentException("El destinatario no puede ser nulo para crear una notificación.");
@@ -39,7 +39,7 @@ public class NotificacionServiceImpl implements NotificacionService {
         NotificacionModel notificacion = new NotificacionModel();
         notificacion.setUsuarioDestinatario(destinatario);
         notificacion.setMensaje(mensaje);
-        // fechaCreacion y leida (false) se establecen en el constructor de NotificacionModel por defecto
+
         return notificacionRepository.save(notificacion);
     }
 
@@ -77,12 +77,10 @@ public class NotificacionServiceImpl implements NotificacionService {
 
         if (notificacionOpt.isPresent()) {
             NotificacionModel notificacion = notificacionOpt.get();
-            // Verificar que la notificación pertenezca al usuario
             if (!notificacion.getUsuarioDestinatario().getId().equals(usuario.getId())) {
-                // Lanza una excepción o devuelve Optional.empty() si un usuario intenta marcar
-                // una notificación que no es suya. Por seguridad, es mejor no revelar si existe o no.
+
                 throw new SecurityException("El usuario no tiene permiso para modificar esta notificación.");
-                // return Optional.empty();
+
             }
             if (!notificacion.isLeida()) {
                 notificacion.setLeida(true);
@@ -90,7 +88,7 @@ public class NotificacionServiceImpl implements NotificacionService {
             }
             return Optional.of(notificacion);
         }
-        return Optional.empty(); // Notificación no encontrada
+        return Optional.empty();
     }
 
     @Override
@@ -106,7 +104,7 @@ public class NotificacionServiceImpl implements NotificacionService {
         for (NotificacionModel notificacion : noLeidas) {
             notificacion.setLeida(true);
         }
-        notificacionRepository.saveAll(noLeidas); // Guarda todos los cambios en una sola operación de ser posible
+        notificacionRepository.saveAll(noLeidas);
         return noLeidas.size();
     }
 

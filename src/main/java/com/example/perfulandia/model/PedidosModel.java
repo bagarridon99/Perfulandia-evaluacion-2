@@ -11,7 +11,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "pedidos")
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) // <-- ANOTACIÓN AÑADIDA
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class PedidosModel {
 
     @Id
@@ -30,14 +30,14 @@ public class PedidosModel {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false)
-    private UsuarioModel usuario; // Considera @JsonBackReference si UsuarioModel tiene @JsonManagedReference a pedidos
+    private UsuarioModel usuario;
 
     @OneToMany(
             mappedBy = "pedido",
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
-    @JsonManagedReference // Para el ciclo Pedido <-> DetallePedido
+    @JsonManagedReference
     private List<DetallePedidoModel> detalles = new ArrayList<>();
 
     public PedidosModel() {
@@ -46,7 +46,7 @@ public class PedidosModel {
         this.totalPedido = BigDecimal.ZERO;
     }
 
-    // --- Getters y Setters (sin cambios) ---
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public LocalDateTime getFechaPedido() { return fechaPedido; }

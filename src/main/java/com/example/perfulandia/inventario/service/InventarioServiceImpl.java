@@ -55,8 +55,7 @@ public class InventarioServiceImpl implements InventarioService {
             inventario.setCantidadDisponible(stockInicial);
         } else {
             inventario = new InventarioModel();
-            // NO establecemos el ID manualmente aquí: inventario.setId(producto.getId());
-            // Al establecer la relación con @MapsId, Hibernate se encarga del ID.
+
             inventario.setProducto(producto);
             inventario.setCantidadDisponible(stockInicial);
         }

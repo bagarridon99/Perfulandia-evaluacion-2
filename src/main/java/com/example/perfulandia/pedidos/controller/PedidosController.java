@@ -31,7 +31,7 @@ public class PedidosController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no autenticado o detalles de usuario no disponibles.");
         }
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String emailUsuario = userDetails.getUsername(); // Asumimos que el username es el email
+        String emailUsuario = userDetails.getUsername();
 
         try {
             PedidosModel pedidoCreado = pedidosService.crearPedido(requestDTO, emailUsuario);
@@ -39,7 +39,7 @@ public class PedidosController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage()); // Para stock, producto no encontrado, etc.
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         }
     }
 
@@ -71,14 +71,11 @@ public class PedidosController {
         }
     }
 
-    // (ADMIN) Endpoint para actualizar estado - Asegúrate de protegerlo en SecurityConfig
     @PutMapping("/{pedidoId}/estado")
     public ResponseEntity<?> actualizarEstadoPedido(
             @PathVariable Long pedidoId,
             @RequestParam EstadoPedido nuevoEstado) {
-        // Aquí deberías verificar si el usuario es ADMIN antes de llamar al servicio.
-        // Por ahora, el servicio lo maneja, pero el controlador también debería protegerlo.
-        // Ejemplo: if (!authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) { return ... }
+
         try {
             PedidosModel pedidoActualizado = pedidosService.actualizarEstadoPedidoAdmin(pedidoId, nuevoEstado);
             return ResponseEntity.ok(pedidoActualizado);

@@ -15,7 +15,7 @@ import java.util.Map; // Para el contador
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/v1/notificaciones") // Ruta base para los endpoints de notificaciones
+@RequestMapping("/api/v1/notificaciones")
 public class NotificacionController {
 
     private final NotificacionService notificacionService;
@@ -25,7 +25,6 @@ public class NotificacionController {
         this.notificacionService = notificacionService;
     }
 
-    // Obtener todas las notificaciones del usuario autenticado
     @GetMapping
     public ResponseEntity<?> obtenerMisNotificaciones(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated() || !(authentication.getPrincipal() instanceof UserDetails)) {
@@ -38,7 +37,6 @@ public class NotificacionController {
         return ResponseEntity.ok(notificaciones);
     }
 
-    // Obtener solo las notificaciones no leídas del usuario autenticado
     @GetMapping("/no-leidas")
     public ResponseEntity<?> obtenerMisNotificacionesNoLeidas(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated() || !(authentication.getPrincipal() instanceof UserDetails)) {
@@ -51,7 +49,6 @@ public class NotificacionController {
         return ResponseEntity.ok(notificacionesNoLeidas);
     }
 
-    // Obtener el contador de notificaciones no leídas
     @GetMapping("/no-leidas/contador")
     public ResponseEntity<?> contarMisNotificacionesNoLeidas(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated() || !(authentication.getPrincipal() instanceof UserDetails)) {
@@ -66,7 +63,6 @@ public class NotificacionController {
         return ResponseEntity.ok(respuesta);
     }
 
-    // Marcar una notificación específica como leída
     @PutMapping("/{notificacionId}/leida")
     public ResponseEntity<?> marcarNotificacionComoLeida(@PathVariable Long notificacionId, Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated() || !(authentication.getPrincipal() instanceof UserDetails)) {
@@ -80,7 +76,6 @@ public class NotificacionController {
             if (notificacionActualizadaOpt.isPresent()) {
                 return ResponseEntity.ok(notificacionActualizadaOpt.get());
             } else {
-                // Esto podría suceder si la notificación no se encuentra, o ya estaba leída y el servicio devuelve Optional.empty()
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Notificación no encontrada o ya estaba marcada como leída.");
             }
         } catch (SecurityException e) { // Si el usuario no tiene permiso
@@ -90,7 +85,6 @@ public class NotificacionController {
         }
     }
 
-    // Marcar todas las notificaciones del usuario como leídas
     @PutMapping("/marcar-todas-leidas")
     public ResponseEntity<?> marcarTodasComoLeidas(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated() || !(authentication.getPrincipal() instanceof UserDetails)) {
@@ -105,7 +99,6 @@ public class NotificacionController {
         return ResponseEntity.ok(respuesta);
     }
 
-    // Eliminar una notificación específica
     @DeleteMapping("/{notificacionId}")
     public ResponseEntity<?> eliminarNotificacion(@PathVariable Long notificacionId, Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated() || !(authentication.getPrincipal() instanceof UserDetails)) {

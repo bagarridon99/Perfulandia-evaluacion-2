@@ -27,13 +27,11 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     @Transactional
     public UsuarioModel anadirUsuario(UsuarioModel usuario) {
-        // --- INICIO DE CAMBIO/VERIFICACIÓN ---
-        // Si el campo 'roles' en el objeto UsuarioModel que llega es nulo o vacío,
-        // asignamos "ROLE_USER" por defecto.
+
         if (usuario.getRoles() == null || usuario.getRoles().trim().isEmpty()) {
-            usuario.setRoles("ROLE_USER"); // Asigna un rol por defecto
+            usuario.setRoles("ROLE_USER");
         }
-        // --- FIN DE CAMBIO/VERIFICACIÓN ---
+
 
         usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
         return usuarioRepository.save(usuario);
@@ -66,14 +64,11 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuarioExistente.setNombre(usuarioConNuevosDatos.getNombre());
         usuarioExistente.setEmail(usuarioConNuevosDatos.getEmail());
 
-        // Solo actualiza y encripta la contraseña si se proporciona una nueva y no está vacía
+
         if (usuarioConNuevosDatos.getPassword() != null && !usuarioConNuevosDatos.getPassword().trim().isEmpty()) {
             usuarioExistente.setPassword(passwordEncoder.encode(usuarioConNuevosDatos.getPassword()));
         }
-        // Si quisieras actualizar roles aquí también, necesitarías una lógica similar:
-        // if (usuarioConNuevosDatos.getRoles() != null && !usuarioConNuevosDatos.getRoles().trim().isEmpty()) {
-        //     usuarioExistente.setRoles(usuarioConNuevosDatos.getRoles());
-        // }
+
         return usuarioRepository.save(usuarioExistente);
     }
 

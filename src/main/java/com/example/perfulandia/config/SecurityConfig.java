@@ -45,26 +45,25 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authz -> authz
-                        // --- PERMITIR PETICIONES OPTIONS PARA CORS PREFLIGHT ---
-                        .requestMatchers(HttpMethod.OPTIONS, "/api/v1/**").permitAll() // <-- ¡ESTA LÍNEA ES CLAVE!
+                        .requestMatchers(HttpMethod.OPTIONS, "/api/v1/**").permitAll()
 
-                        // --- Endpoints Públicos ---
+
                         .requestMatchers("/api/v1/autentificacion/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/productos/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/inventarios/producto/**").permitAll()
                         .requestMatchers(HttpMethod.PUT, "/api/v1/inventarios/producto/{productoId}/disminuir").permitAll()
                         .requestMatchers(HttpMethod.PUT, "/api/v1/inventarios/producto/{productoId}/incrementar").permitAll()
 
-                        // --- Endpoints de Pedidos (Requieren autenticación o roles específicos) ---
+
                         .requestMatchers(HttpMethod.POST, "/api/v1/pedidos").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/v1/pedidos/mis-pedidos").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/v1/pedidos/{pedidoId}").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/v1/pedidos/{pedidoId}/estado").authenticated() // Cambiado a authenticated para simplificar si no tienes admins aún
 
-                        // --- Endpoints de Notificaciones (Requieren autenticación) ---
+
                         .requestMatchers("/api/v1/notificaciones/**").authenticated()
 
-                        // --- Cualquier otra petición requiere autenticación ---
+
                         .anyRequest().authenticated()
                 )
                 .httpBasic(withDefaults())

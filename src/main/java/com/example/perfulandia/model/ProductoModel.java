@@ -6,7 +6,7 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "productos")
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) // <-- ANOTACIÓN AÑADIDA
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class ProductoModel {
 
     @Id
@@ -51,7 +51,7 @@ public class ProductoModel {
         this.tamanioMl = tamanioMl;
     }
 
-    // --- Getters y Setters (sin cambios) ---
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getNombre() { return nombre; }

@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 
 @Entity
 @Table(name = "detalles_pedido")
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) // <-- ANOTACIÓN AÑADIDA
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class DetallePedidoModel {
 
     @Id
@@ -16,13 +16,12 @@ public class DetallePedidoModel {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pedido_id", nullable = false)
-    @JsonBackReference // Para el ciclo con PedidosModel
+    @JsonBackReference
     private PedidosModel pedido;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "producto_id", nullable = false)
-    private ProductoModel producto; // Si ProductoModel no tiene una lista de detalles con @JsonManagedReference, esto está bien.
-    // Si ProductoModel la tuviera, necesitarías @JsonBackReference aquí también (con un nombre diferente).
+    private ProductoModel producto;
 
     @Column(nullable = false)
     private Integer cantidad;
@@ -35,7 +34,7 @@ public class DetallePedidoModel {
 
     public DetallePedidoModel() {}
 
-    // --- Getters y Setters (sin cambios) ---
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public PedidosModel getPedido() { return pedido; }

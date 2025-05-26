@@ -13,12 +13,12 @@ public class WebConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/api/v1/**") // Asegúrate que el patrón cubra tus endpoints
-                        .allowedOrigins("*")       // Permite cualquier origen (para desarrollo)
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // INCLUYE "OPTIONS"
-                        .allowedHeaders("*")       // Permite todas las cabeceras
+                registry.addMapping("/api/v1/**")
+                        .allowedOrigins("*")
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedHeaders("*")
                         .allowCredentials(false);
-                // .maxAge(3600); // Opcional: cuánto tiempo el navegador puede cachear la respuesta preflight
+
             }
         };
     }

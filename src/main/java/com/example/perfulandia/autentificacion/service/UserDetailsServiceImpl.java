@@ -1,4 +1,4 @@
-package com.example.perfulandia.autentificacion.service; // O tu paquete elegido
+package com.example.perfulandia.autentificacion.service;
 
 import com.example.perfulandia.model.UsuarioModel;
 import com.example.perfulandia.usuario.service.UsuarioService; //
@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList; // Para las autoridades/roles, si no tienes roles definidos aún
 
-@Service("userDetailsService") // Es importante darle un nombre al bean si tienes varias implementaciones
+@Service("userDetailsService")
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     private final UsuarioService usuarioService;
@@ -30,8 +30,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         UsuarioModel usuarioModel = usuarioService.buscarPorEmail(usernameOrEmail)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con email: " + usernameOrEmail));
 
-        // Por ahora, no estamos manejando roles/autoridades. Si los tuvieras en UsuarioModel, los cargarías aquí.
-        // El tercer argumento de User() es una colección de GrantedAuthority.
+
         return new User(usuarioModel.getEmail(), usuarioModel.getPassword(), new ArrayList<>());
     }
 }

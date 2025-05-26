@@ -35,7 +35,6 @@ public class NotificacionModel {
         this.usuarioDestinatario = usuarioDestinatario;
     }
 
-    // Getters y Setters para todos los campos...
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getMensaje() { return mensaje; }

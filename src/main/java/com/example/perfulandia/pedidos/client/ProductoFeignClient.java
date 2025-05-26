@@ -12,5 +12,4 @@ public interface ProductoFeignClient {
     @GetMapping("/{id}")
     ProductoModel obtenerProductoPorId(@PathVariable("id") Long id);
 
-    // Podrías añadir más métodos aquí para otros endpoints de ProductoController si los necesitas.
 }

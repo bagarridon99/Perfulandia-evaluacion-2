@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.*; // Importaciones para las anot
 import java.util.List;
 import java.util.Optional;
 
-@RestController // Indica que esta clase es un controlador REST y que los métodos devolverán datos directamente en el cuerpo de la respuesta (ej. JSON)
-@RequestMapping("/api/v1/productos") // Define la ruta base para todos los endpoints en este controlador
+@RestController
+@RequestMapping("/api/v1/productos")
 public class ProductoController {
 
     private final ProductoService productoService;
@@ -24,19 +24,17 @@ public class ProductoController {
 
     @PostMapping
     public ResponseEntity<ProductoModel> anadirProducto(@RequestBody ProductoModel producto) {
-        // @RequestBody indica que el cuerpo de la petición HTTP (ej. un JSON) se convertirá a un objeto ProductoModel
         ProductoModel nuevoProducto = productoService.anadirProducto(producto);
-        return new ResponseEntity<>(nuevoProducto, HttpStatus.CREATED); // Devuelve el producto creado y el estado HTTP 201 (Created)
+        return new ResponseEntity<>(nuevoProducto, HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ProductoModel> buscarProductoPorId(@PathVariable Long id) {
-        // @PathVariable indica que el valor de "id" en la URL se pasará como parámetro al método
         Optional<ProductoModel> productoOptional = productoService.buscarProductoPorId(id);
         if (productoOptional.isPresent()) {
-            return new ResponseEntity<>(productoOptional.get(), HttpStatus.OK); // Devuelve el producto y el estado HTTP 200 (OK)
+            return new ResponseEntity<>(productoOptional.get(), HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Devuelve el estado HTTP 404 (Not Found) si no existe
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
@@ -46,14 +44,13 @@ public class ProductoController {
         return new ResponseEntity<>(productos, HttpStatus.OK);
     }
 
-    // Endpoint para EDITAR (actualizar) un producto existente
-    // HTTP PUT a /api/v1/productos/{id}
+
     @PutMapping("/{id}")
     public ResponseEntity<ProductoModel> editarProducto(@PathVariable Long id, @RequestBody ProductoModel productoConNuevosDatos) {
         try {
             ProductoModel productoActualizado = productoService.editarProducto(id, productoConNuevosDatos);
             return new ResponseEntity<>(productoActualizado, HttpStatus.OK);
-        } catch (RuntimeException e) { // Captura la excepción si el producto no se encuentra (lanzada por el servicio)
+        } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
@@ -62,8 +59,8 @@ public class ProductoController {
     public ResponseEntity<Void> eliminarProducto(@PathVariable Long id) {
         try {
             productoService.eliminarProducto(id);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT); // Devuelve el estado HTTP 204 (No Content) indicando éxito sin cuerpo de respuesta
-        } catch (RuntimeException e) { // Captura la excepción si el producto no se encuentra
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
