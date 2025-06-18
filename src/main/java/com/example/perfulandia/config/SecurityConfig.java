@@ -1,12 +1,11 @@
 package com.example.perfulandia.config;
 
-import com.example.perfulandia.autentificacion.service.UserDetailsServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -17,14 +16,8 @@ import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
-
-    private final UserDetailsServiceImpl userDetailsService;
-
-    @Autowired
-    public SecurityConfig(UserDetailsServiceImpl userDetailsService) {
-        this.userDetailsService = userDetailsService;
-    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -32,12 +25,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
-        AuthenticationManagerBuilder authenticationManagerBuilder =
-                http.getSharedObject(AuthenticationManagerBuilder.class);
-        authenticationManagerBuilder.userDetailsService(userDetailsService)
-                .passwordEncoder(passwordEncoder());
-        return authenticationManagerBuilder.build();
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
     }
 
     @Bean
@@ -45,29 +34,30 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers(HttpMethod.OPTIONS, "/api/v1/**").permitAll()
-
-
+                        // --- RUTAS PÚBLICAS ---
                         .requestMatchers("/api/v1/autentificacion/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/productos/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/inventarios/producto/**").permitAll()
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/inventarios/producto/{productoId}/disminuir").permitAll()
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/inventarios/producto/{productoId}/incrementar").permitAll()
 
+                        // --- RUTAS DE USUARIO (USER o ADMIN) ---
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/pedidos/{pedidoId}/estado").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/pedidos/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/api/v1/notificaciones/**").hasAnyRole("USER", "ADMIN")
+                        // REGLAS ESPECÍFICAS: Mantenemos estas para que los pedidos funcionen
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/inventarios/producto/{productoId}/disminuir").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/inventarios/producto/{productoId}/incrementar").hasAnyRole("USER", "ADMIN")
 
-                        .requestMatchers(HttpMethod.POST, "/api/v1/pedidos").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/pedidos/mis-pedidos").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/pedidos/{pedidoId}").authenticated()
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/pedidos/{pedidoId}/estado").authenticated() // Cambiado a authenticated para simplificar si no tienes admins aún
+                        // --- RUTAS DE ADMINISTRADOR (SOLO ADMIN) ---
+                        .requestMatchers("/api/v1/usuarios/**").hasRole("ADMIN")
+                        // REGLA GENERAL: La regla general para inventario ahora se encarga de todo lo demás (GETs, POSTs, etc.)
+                        .requestMatchers("/api/v1/inventarios/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/productos").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/productos/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/productos/**").hasRole("ADMIN")
 
-
-                        .requestMatchers("/api/v1/notificaciones/**").authenticated()
-
-
+                        // --- CUALQUIER OTRA RUTA ---
                         .anyRequest().authenticated()
                 )
-                .httpBasic(withDefaults())
-                .formLogin(withDefaults());
+                .httpBasic(withDefaults());
 
         return http.build();
     }
