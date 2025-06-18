@@ -25,12 +25,10 @@
 		<tag/>
 		<url/>
 	</scm>
-    <properties>
-        <java.version>24</java.version>
-        <spring-cloud.version>2025.0.0-RC1</spring-cloud.version>
-        <maven.compiler.source>24</maven.compiler.source>
-        <maven.compiler.target>24</maven.compiler.target>
-    </properties>
+	<properties>
+		<java.version>24</java.version>
+		<spring-cloud.version>2025.0.0-RC1</spring-cloud.version>
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -90,6 +88,11 @@
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>com.github.javafaker</groupId>
+			<artifactId>javafaker</artifactId>
+			<version>1.0.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
