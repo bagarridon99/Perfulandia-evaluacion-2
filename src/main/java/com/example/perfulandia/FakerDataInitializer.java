@@ -1,4 +1,4 @@
-/* ELIMINAR ESTO PARA QUE EL CODIGO FUNCIONE
+
 
 
 package com.example.perfulandia;
@@ -192,4 +192,3 @@ public class FakerDataInitializer implements CommandLineRunner {
     }
 }
 
-*/

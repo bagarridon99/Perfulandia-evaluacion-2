@@ -2,26 +2,33 @@ package com.example.perfulandia.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import io.swagger.v3.oas.annotations.media.Schema; // Importar
 
 @Entity
 @Table(name = "notificaciones")
+@Schema(description = "Representa una notificación enviada a un usuario.")
 public class NotificacionModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Schema(description = "ID único de la notificación.", example = "1")
     private Long id;
 
     @Column(nullable = false, columnDefinition = "TEXT")
+    @Schema(description = "El contenido del mensaje de la notificación.", example = "Tu pedido #1001 ha sido enviado.")
     private String mensaje;
 
     @Column(nullable = false)
+    @Schema(description = "Fecha y hora en que la notificación fue creada.", example = "2024-06-18T11:00:00")
     private LocalDateTime fechaCreacion;
 
     @Column(nullable = false)
+    @Schema(description = "Indica si la notificación ha sido leída por el usuario (true/false).", example = "false")
     private boolean leida;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false)
+    @Schema(description = "El usuario que es el destinatario de esta notificación.")
     private UsuarioModel usuarioDestinatario;
 
     public NotificacionModel() {

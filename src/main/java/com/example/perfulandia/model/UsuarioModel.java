@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import io.swagger.v3.oas.annotations.media.Schema; // Importar
 
 import java.util.Collection;
 import java.util.List;
@@ -12,23 +13,30 @@ import java.util.List;
 @Entity
 @Table(name = "usuarios")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-public class UsuarioModel implements UserDetails { // <-- ¡ESTA LÍNEA ES LA CLAVE!
+@Schema(description = "Representa un usuario registrado en la plataforma de Perfulandia.")
+public class UsuarioModel implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Schema(description = "ID único del usuario.", example = "1")
     private Long id;
 
     @Column(nullable = false, length = 150)
+    @Schema(description = "Nombre completo del usuario.", example = "Juan Pérez")
     private String nombre;
 
     @Column(nullable = false, unique = true, length = 200)
+    @Schema(description = "Dirección de correo electrónico única del usuario (usada como nombre de usuario para login).", example = "juan.perez@example.com")
     private String email;
 
     @Column(nullable = false, length = 255)
+    // No incluir example para la contraseña para evitar exponerla
+    @Schema(description = "Contraseña cifrada del usuario.")
     private String password;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Schema(description = "Rol del usuario en el sistema (ROLE_USER o ROLE_ADMIN).", example = "ROLE_USER")
     private Role role;
 
     public UsuarioModel() {
