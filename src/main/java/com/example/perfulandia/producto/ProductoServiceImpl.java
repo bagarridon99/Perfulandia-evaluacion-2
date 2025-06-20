@@ -1,4 +1,4 @@
-package com.example.perfulandia.producto.service;
+package com.example.perfulandia.producto;
 
 import com.example.perfulandia.model.ProductoModel;
 import com.example.perfulandia.producto.repository.ProductoRepository;

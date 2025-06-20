@@ -3,7 +3,7 @@ package com.example.perfulandia.inventario.controller;
 import com.example.perfulandia.model.InventarioModel;
 import com.example.perfulandia.model.ProductoModel; // <-- IMPORTA ProductoModel
 import com.example.perfulandia.inventario.service.InventarioService;
-import com.example.perfulandia.producto.service.ProductoService; // <-- IMPORTA ProductoService
+import com.example.perfulandia.producto.ProductoService; // <-- IMPORTA ProductoService
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

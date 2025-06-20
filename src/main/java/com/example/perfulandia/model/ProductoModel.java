@@ -3,7 +3,7 @@ package com.example.perfulandia.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import io.swagger.v3.oas.annotations.media.Schema; // Importar esta anotación
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Entity
 @Table(name = "productos")
@@ -52,6 +52,7 @@ public class ProductoModel {
     public ProductoModel() {
     }
 
+    // Tu constructor existente sin ID
     public ProductoModel(String nombre, String descripcion, String marca, String categoria, double precio, int tamanioMl) {
         this.nombre = nombre;
         this.descripcion = descripcion;
@@ -61,7 +62,22 @@ public class ProductoModel {
         this.tamanioMl = tamanioMl;
     }
 
-    // --- GETTERS Y SETTERS ---
+    // ¡NUEVO CONSTRUCTOR QUE EL TEST NECESITA (con ID)!
+    // Este constructor permite crear ProductoModel con todos los campos, incluido el ID.
+    public ProductoModel(Long id, String nombre, String descripcion, String marca, String categoria, double precio, int tamanioMl) {
+        this.id = id;
+        this.nombre = nombre;
+        this.descripcion = descripcion;
+        this.marca = marca;
+        this.categoria = categoria;
+        this.precio = precio;
+        this.tamanioMl = tamanioMl;
+        // inventario no se incluye aquí para simplificar el constructor para tests,
+        // ya que es una relación OneToOne y se puede setear por separado.
+    }
+
+
+    // --- GETTERS Y SETTERS --- (Asegúrate de tenerlos todos, como ya los tienes)
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getNombre() { return nombre; }

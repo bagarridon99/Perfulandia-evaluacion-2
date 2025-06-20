@@ -1,12 +1,11 @@
 package com.example.perfulandia.producto.controller;
 
 import com.example.perfulandia.model.ProductoModel;
-import com.example.perfulandia.producto.service.ProductoService;
+import com.example.perfulandia.producto.ProductoService;
 
 // Importaciones de Spring HATEOAS
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.Link; // Puedes usar esta para Links manuales, aunque WebMvcLinkBuilder es mejor
 
 // Importación estática para WebMvcLinkBuilder para un código más limpio
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
