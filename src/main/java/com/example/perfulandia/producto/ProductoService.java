@@ -1,4 +1,4 @@
-package com.example.perfulandia.producto.service;
+package com.example.perfulandia.producto;
 
 import com.example.perfulandia.model.ProductoModel; // Importa tu entidad
 import java.util.List;
