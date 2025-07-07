@@ -23,6 +23,7 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+
         // --- CREACIÓN DEL USUARIO ADMINISTRADOR POR DEFECTO ---
         String adminEmail = "admin@admin.com";
         if (!usuarioRepository.findByEmail(adminEmail).isPresent()) {
